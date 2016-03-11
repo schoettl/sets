@@ -10,7 +10,7 @@ patterns = [docopt|generate_items
 
 usage:
   generate_items -S [-s N] [-m N]
-  generate_items -P N
+  generate_items -P N [-s N [-b]]
 
 options:
   -S  generate sets with N spans/matches
@@ -18,8 +18,11 @@ options:
   -m, --matches=N
   -P N
       generate items that are not sets in N features;
-      this means, that the "odd ball" (last item) differs in N features
+      this means, that the "oddball" (last item) differs in N features
       from the actual third set item.
+  -b, --balanced
+      makes sure that one match and one span rule are broken in 1-span
+      and 2-span sets if two rules are broken.
 |]
 
 colors = "bgr"
@@ -35,9 +38,9 @@ main = do
     -- printResult allSets
 
     args <- parseArgsOrExit patterns =<< getArgs
+    let nS = read $ getArgWithDefault args "-1" $ longOption "spans"   :: Int
+    let nM = read $ getArgWithDefault args "-1" $ longOption "matches" :: Int
     when (args `isPresent` shortOption 'S') $ do
-        let nS = read $ getArgWithDefault args "-1" $ longOption "spans"   :: Int
-        let nM = read $ getArgWithDefault args "-1" $ longOption "matches" :: Int
         let nSpan  = if nS < 0 then const True else isNSpan nS
         let nMatch = if nM < 0 then const True else isNMatch nM
         let result = filter (\x -> nSpan x && nMatch x) allSets
@@ -45,11 +48,18 @@ main = do
     when (args `isPresent` shortOption 'P') $ do
         n <- fmap read $ args `getArgOrExit` shortOption 'P'
         let n' = 3 - n -- is not set in n features -> is set in n' features
-        let result = filter (isSetInNFeatures n') allCombinations
+        let nFeatureSet = filter (isSetInNFeatures n') allCombinations
+        let balanced = args `isPresent` longOption "balanced"
+        let result = if nS == -1
+            then nFeatureSet
+            else let nSpanNFeatureSet = filter (isNSpan nS . take 2) nFeatureSet
+                  in if not balanced
+                        then nSpanNFeatureSet
+                        else case nS of
+                                1 -> filter (isNMatch 1 `fAnd` isNSpan 0) nSpanNFeatureSet
+                                2 -> filter (isNMatch 0 `fAnd` isNSpan 1) nSpanNFeatureSet
+                                _ -> nSpanNFeatureSet
         printResult result
-        -- Maria's nrow(span3_noSETs):
-        -- let result' = filter (isNSpan 3 . take 2) result
-        -- printResult result'
 
 
 isSet :: [String] -> Bool
@@ -86,5 +96,5 @@ printResult :: [[String]] -> IO ()
 printResult = mapM_ (putStrLn . unwords)
 
 -- | Wenn man f && g als predicate verwenden will...
--- (&&&) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
--- (&&&) f g x = f x && g x
+fAnd :: (a -> Bool) -> (a -> Bool) -> a -> Bool
+fAnd f g x = f x && g x
