@@ -13,13 +13,14 @@ usage:
   generate_items -P N [-s N [-b]]
 
 options:
-  -S  generate sets with N spans/matches
+  -S  generate sets with N spans/matches.
   -s, --spans=N
   -m, --matches=N
   -P N
       generate items that are not sets in N features;
       this means, that the "oddball" (last item) differs in N features
       from the actual third set item.
+      if --spans is given, it only applies for the first two items!
   -b, --balanced
       makes sure that one match and one span rule are broken in 1-span
       and 2-span sets if two rules are broken.
