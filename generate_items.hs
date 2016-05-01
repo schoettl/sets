@@ -44,7 +44,7 @@ main = do
     when (args `isPresent` shortOption 'S') $ do
         let nSpan  = if nS < 0 then const True else isNSpan nS
         let nMatch = if nM < 0 then const True else isNMatch nM
-        let result = filter (\x -> nSpan x && nMatch x) allSets
+        let result = filter (nSpan `fAnd` nMatch) allSets
         printResult result
     when (args `isPresent` shortOption 'P') $ do
         n <- fmap read $ args `getArgOrExit` shortOption 'P'
