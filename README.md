@@ -32,6 +32,19 @@ runhaskell generate_items.hs -S -s2
 runhaskell generate_items.hs -P2 -s1
 ```
 
+
+Another request
+---------------
+
+From non-sets generated with `-P1`, only keep those where the span-rule is broken.
+
+```
+cat non-sets-P1.txt | awk -f label_P1_nonsets.awk | awk '/span-rule-broken/ { print $1, $2, $3 }'
+```
+
+Analogously for match-rule broken.
+
+
 Terms
 -----
 
