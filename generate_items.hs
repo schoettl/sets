@@ -20,7 +20,7 @@ options:
       generate items that are not sets in N features;
       this means, that the "oddball" (last item) differs in N features
       from the actual third set item.
-      if --spans is given, it only applies for the first two items!
+      if --spans is given, it only counts for the first two items.
   -b, --balanced
       makes sure that one match and one span rule are broken in 1-span
       and 2-span sets if two rules are broken.
